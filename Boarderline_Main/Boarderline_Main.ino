@@ -699,8 +699,7 @@ class Boarderline {
       marker(true);
       toLine(1 + xs, 1 + ys);
       toLine(1.5 + xs, 1.75 + ys);
-      toLine(1 + xs, 1 + ys);
-      toLine(1 + xs, 0.25 + ys);
+      toLine(0.5 + xs, 0.25 + ys);
       marker(false);
     }
     void printZ(int xs, int ys) {//x start and y start - coordinates of bottom left corner of letter
@@ -787,7 +786,7 @@ class Boarderline {
     }
     void printString(String inString, int start = 0) {
       char stringArray[inString.length() + 1];
-      inString.toCharArray(stringArray, inString.length()+1); //put string in array of chars we can use
+      inString.toCharArray(stringArray, inString.length() + 1); //put string in array of chars we can use
       Serial.println("Our String is=" + inString + "--- Size of array=" + String(inString.length()));
       for (int i = 0; i < inString.length(); i++) {
         Serial.println("Writing: " + String(stringArray[i]) + " In Position: " + String(start + i));
@@ -833,8 +832,9 @@ void setup() {
 void loop() {
 
   board.printString("TOP", 2);
-  //board.printString("TEMP", 10);
-  board.printString(String(getWeather()), 18);
+  board.printString("TEMP", 10);
+  board.printString("TODAY", 18);
+  board.printString(String(getWeather()) + "C", 26);
   //board.printString("TAKING", 24);
   //board.printString("OVER", 35);
   board.to(8, 8);

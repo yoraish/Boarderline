@@ -421,15 +421,15 @@ class Boarderline {
         case '6':
           print6(xCoords[index], yCoords[index]);
           break;
-          //        case '7':
-          //          print7(xCoords[index], yCoords[index]);
-          //          break;
-          //        case '8':
-          //          print8(xCoords[index], yCoords[index]);
-          //          break;
-          //        case '9':
-          //          print9(xCoords[index], yCoords[index]);
-          //          break;
+        case '7':
+          print7(xCoords[index], yCoords[index]);
+          break;
+        case '8':
+          print8(xCoords[index], yCoords[index]);
+          break;
+        case '9':
+          print9(xCoords[index], yCoords[index]);
+          break;
 
       }
     }
@@ -782,6 +782,37 @@ class Boarderline {
       toLine(1.5 + xs, 0.25 + ys);
       toLine(1.5 + xs, 1 + ys);
       toLine(0.5 + xs, 1 + ys);
+      marker(false);
+    }
+    void print7(int xs, int ys) {//x start and y start - bottom left corner of letter
+      marker(false);
+      to(0.5 + xs, 1.75 + ys);
+      marker(true);
+      toLine(1.5 + xs, 1.75 + ys);
+      toLine(0.5 + xs, 0.25 + ys);
+      marker(false);
+    }
+    void print8(int xs, int ys) {//x start and y start - bottom left corner of letter
+      marker(false);
+      to(1.5 + xs, 1.75 + ys);
+      marker(true);
+      toLine(0.5 + xs, 1.75 + ys);
+      toLine(0.5 + xs, 0.25 + ys);
+      toLine(1.5 + xs, 0.25 + ys);
+      toLine(1.5 + xs, 1.75 + ys);
+      toLine(1.5 + xs, 1 + ys);
+      toLine(0.5 + xs, 1 + ys);
+      marker(false);
+    }
+    void print9(int xs, int ys) {//x start and y start - bottom left corner of letter
+      marker(false);
+      to(1.5 + xs, 1 + ys);
+      marker(true);
+      toLine(0.5 + xs, 1 + ys);
+      toLine(0.5 + xs, 1.75 + ys);
+      toLine(1.5 + xs, 1.75 + ys);
+      toLine(1.5 + xs, 0.25 + ys);
+      toLine(0.5 + xs, 0.25 + ys);
       marker(false);
     }
     void printString(String inString, int start = 0) {

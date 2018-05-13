@@ -63,6 +63,16 @@ String do_GET() {
 
   }
 }
+int getWeather() {
+  //TRIAL
+  String temp = do_GET();
+  Serial.println(temp);
+  String kelvin = temp.substring(temp.indexOf("temp_max") + 10, temp.indexOf("temp_max") + 14);
+  Serial.println("Temper Kelvin " + kelvin);
+  int celsiusMax = kelvin.toInt() - 273;
+  Serial.println("C: " + String(celsiusMax));
+  return (celsiusMax);
+}
 
 class Boarderline {
   public:
@@ -145,8 +155,8 @@ class Boarderline {
       if (angleT < 0) {
         angleT += 180;
       }
-      Serial.print("Going Angle: "); Serial.println(angleT);
-      Serial.print("Going Radius: "); Serial.println(radiusT);
+      //Serial.print("Going Angle: "); Serial.println(angleT);
+      //Serial.print("Going Radius: "); Serial.println(radiusT);
       //check if in range
       if (angleT < angleMin || angleT > angleMax) {
         Serial.println("angle out of range");
@@ -166,7 +176,7 @@ class Boarderline {
           angleDir = CW;
         }
         float angleDelta = fabs(angleT - angle); // <=== that's what we need for later. we now have the number of degrees and direction
-        Serial.print("moving degrees: "); Serial.println(angleDelta);
+        //Serial.print("moving degrees: "); Serial.println(angleDelta);
         //direction of radius
         if (radiusT > radius) {
           radiusDir = out;
@@ -175,13 +185,13 @@ class Boarderline {
           radiusDir = in;
         }
         float radiusDelta = fabs(radiusT - radius);// <=== that's what we need for later. we now have the number of cm and direction
-        Serial.print("moving cm: "); Serial.println(radiusDelta);
+        //Serial.print("moving cm: "); Serial.println(radiusDelta);
         //convert the movement to steps
         int angleDeltaSteps = angleDelta * angleToSteps;
         int radiusDeltaSteps = radiusDelta * cmToSteps;
         //print the steps
-        Serial.print("Moving Angle Steps: "); Serial.println(angleDeltaSteps);
-        Serial.print("Moving Radius Steps: "); Serial.println(radiusDeltaSteps);
+        //Serial.print("Moving Angle Steps: "); Serial.println(angleDeltaSteps);
+        //Serial.print("Moving Radius Steps: "); Serial.println(radiusDeltaSteps);
         //now we can actually start moving
         bool radiusThere = false;
         bool angleThere = false;
@@ -271,7 +281,7 @@ class Boarderline {
         //calculate number of parts ("steps") we can go through
         float parts = fabs(yt - yi) / fabs(delta);
         int partsInt = int(parts);
-        Serial.print("have vert line, with parts = "); Serial.println(partsInt);
+        //Serial.print("have vert line, with parts = "); Serial.println(partsInt);
         //go through the parts
         for (int i = 0; i < partsInt; i++) {
           to(xt, yi + i * delta);
@@ -289,7 +299,7 @@ class Boarderline {
         //go
         for (int i = 0; i < partsInt; i++) {
           float yPart = m * (i * delta) + yi; // claculate y for given x = [xi + i*delta] on line. xi vanishes from substraction
-          Serial.print("GOING TO PART WITH X = "); Serial.print(xi + i * delta); Serial.print(" AND Y = "); Serial.println(yPart);
+          //Serial.print("GOING TO PART WITH X = "); Serial.print(xi + i * delta); Serial.print(" AND Y = "); Serial.println(yPart);
           to(xi + i * delta, yPart);
         }
         to(xt, yt);//the to function takes care of updating global variables x/yLast and radius and angle
@@ -411,15 +421,15 @@ class Boarderline {
         case '6':
           print6(xCoords[index], yCoords[index]);
           break;
-        case '7':
-          print7(xCoords[index], yCoords[index]);
-          break;
-        case '8':
-          print8(xCoords[index], yCoords[index]);
-          break;
-        case '9':
-          print9(xCoords[index], yCoords[index]);
-          break;
+          //        case '7':
+          //          print7(xCoords[index], yCoords[index]);
+          //          break;
+          //        case '8':
+          //          print8(xCoords[index], yCoords[index]);
+          //          break;
+          //        case '9':
+          //          print9(xCoords[index], yCoords[index]);
+          //          break;
 
       }
     }
@@ -764,10 +774,23 @@ class Boarderline {
       toLine(0.5 + xs, 0.25 + ys);
       marker(false);
     }
+    void print6(int xs, int ys) {//x start and y start - bottom left corner of letter
+      marker(false);
+      to(1.5 + xs, 1.75 + ys);
+      marker(true);
+      toLine(0.5 + xs, 1.75 + ys);
+      toLine(0.5 + xs, 0.25 + ys);
+      toLine(1.5 + xs, 0.25 + ys);
+      toLine(1.5 + xs, 1 + ys);
+      toLine(0.5 + xs, 1 + ys);
+      marker(false);
+    }
     void printString(String inString, int start = 0) {
-      char stringArray[sizeof(inString)];
-      inString.toCharArray(stringArray, sizeof(inString)); //put string in array of chars we can use
-      for (int i = 0; i < sizeof(stringArray); i++) {
+      char stringArray[inString.length() + 1];
+      inString.toCharArray(stringArray, inString.length()+1); //put string in array of chars we can use
+      Serial.println("Our String is=" + inString + "--- Size of array=" + String(inString.length()));
+      for (int i = 0; i < inString.length(); i++) {
+        Serial.println("Writing: " + String(stringArray[i]) + " In Position: " + String(start + i));
         printChar(stringArray[i], start + i);
       }
     }
@@ -798,13 +821,6 @@ void setup() {
     Serial.println(WiFi.status());
     ESP.restart(); // restart the ESP
   }
-  //TRIAL
-  String temp = do_GET();
-  Serial.println(temp);
-  String hot = temp.substring(temp.indexOf("temp_max") + 10, temp.indexOf("temp_max") + 14);
-  Serial.println("Temper Kelvin " + hot);
-  int celsiusMax = hot.toInt() - 273;
-  Serial.println("C: " + String(celsiusMax));
   //start hardware
   delay(1000);
   Serial.print("Reseting Radius to max extention");
@@ -816,11 +832,13 @@ void setup() {
 
 void loop() {
 
-  board.printString("Y0123", 3);
-  board.printString("NNEOMA", 18);
+  board.printString("TOP", 2);
+  //board.printString("TEMP", 10);
+  board.printString(String(getWeather()), 18);
   //board.printString("TAKING", 24);
   //board.printString("OVER", 35);
   board.to(8, 8);
+  //Serial.println("getWeather: " + String(getWeather()));
   delay(10000);
 
   board.marker(false);

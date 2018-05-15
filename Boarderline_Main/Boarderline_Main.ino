@@ -29,11 +29,23 @@
 //things for wifi
 const int response_timeout = 6000; //ms to wait for response from host
 
+//variables for alarms and realtime sync
+int iHour = 0;
+int iMinute = 0;
+unsigned long iMillis = 0;
+int nowHour = 0;
+int nowMinute = 0;
+unsigned long lastAlarm = 0;
+//alarms hours + minutes
+int aHours[] =   {8, 19};
+int aMinutes[] = {48, 45};
+
 //helper getting function
+WiFiClient client; //instantiate a client object
+
 String do_GET() {
   //check http://api.openweathermap.org/data/2.5/weather?q=Boston&appid=112e62793bece3cadd246dcbea62d7cc
 
-  WiFiClient client; //instantiate a client object
 
   if (client.connect("api.openweathermap.org", 80)) { //try to connect to  host
     // This will send the request to the server
@@ -62,6 +74,72 @@ String do_GET() {
     return op;
 
   }
+}
+void syncTime() {
+  if (client.connect("api.timezonedb.com", 80)) { //try to connect to  host
+    // get information from api - will update the global variables iHour iMinute iMillis to correspond to current time and the millis value in which they were taken
+    client.println("GET /v2/get-time-zone?key=UWXVPZR3T485&format=json&by=zone&zone=America/New_York HTTP/1.1");
+    client.println("Host: api.timezonedb.com");
+    client.print("\r\n");
+    Serial.println("Connected to server to get time!");
+    unsigned long count = millis();
+    while (client.connected())
+    {
+      String line = client.readStringUntil('\n');
+      if (line == "\r")
+      { //got header of response
+        break;
+      }
+      if (millis() - count > 4000) break;
+    }
+    count = millis();
+
+    String op;
+
+    while (client.available())
+    {
+      op += (char)client.read();
+    }
+    Serial.println("this is what we got from time api" + op);
+    iHour = op.substring(op.indexOf("formatted") + 23, op.indexOf("formatted") + 25).toInt();
+    iMinute = op.substring(op.indexOf("formatted") + 26, op.indexOf("formatted") + 28).toInt();
+    //Serial.println("iHour: " + String(iHour) + "iMinute: " + String(iMinute));
+    iMillis = millis();
+    nowHour = iHour;
+    nowMinute = iMinute;
+  }
+}
+bool checkAlarm() {
+  updateTime();
+  for (int i = 0; i < sizeof(aHours) / sizeof(int); i++) {
+    Serial.println( String(nowHour) + ":" + String(nowMinute));
+    //Serial.println("Checking alarm. nowMinute=" + String(nowMinute) + " aHours[i]=" + String(aMinutes[i]));
+    if (nowHour == aHours[i]) {
+      if (nowMinute == aMinutes[i]) {
+        if (millis() - lastAlarm > 60000) {
+          Serial.println("ALARM NOW!");
+          lastAlarm = millis();
+          return (true);
+          break;
+        }
+      }
+    }
+  }
+  //if we got here, no alarm
+  return false;
+}
+//function to update variables nowHour and nowMinutes
+void updateTime() {
+  int deltaMillis = millis() - iMillis;
+  int deltaMinutes = deltaMillis / 60000; //this is how many minutes passed since the initial sync
+  int deltaHours = 0;
+  while (deltaMinutes >= 60) {
+    deltaHours ++;
+    deltaMinutes -= 60;
+  }
+  nowHour = iHour + deltaHours;
+  nowMinute = iMinute + deltaMinutes;
+  //Serial.println("nowHour: " + String(nowHour) + "nowMinute: " + String(nowMinute));
 }
 int getWeather() {
   //TRIAL
@@ -851,6 +929,8 @@ void setup() {
     Serial.println(WiFi.status());
     ESP.restart(); // restart the ESP
   }
+  //sync to realtime
+  syncTime();
   //start hardware
   delay(1000);
   Serial.print("Reseting Radius to max extention");
@@ -861,18 +941,14 @@ void setup() {
 }
 
 void loop() {
-
-  board.printString("TOP", 2);
-  board.printString("TEMP", 10);
-  board.printString("TODAY", 18);
-  board.printString(String(getWeather()) + "C", 26);
-  //board.printString("TAKING", 24);
-  //board.printString("OVER", 35);
-  board.to(8, 8);
-  //Serial.println("getWeather: " + String(getWeather()));
-  delay(10000);
-
-  board.marker(false);
+  if (checkAlarm() == true) {
+    board.printString("ALARM", 2);
+    board.printString("TEMP", 10);
+    board.printString("TODAY", 18);
+    board.printString(String(getWeather()) + "C", 26);
+    board.to(8, 8);
+    delay(10000);
+  }
 
   /*
     //MIT

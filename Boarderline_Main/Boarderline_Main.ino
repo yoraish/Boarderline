@@ -508,7 +508,9 @@ class Boarderline {
         case '9':
           print9(xCoords[index], yCoords[index]);
           break;
-
+        case ':':
+          printColon(xCoords[index], yCoords[index]);
+          break;
       }
     }
 
@@ -893,6 +895,17 @@ class Boarderline {
       toLine(0.5 + xs, 0.25 + ys);
       marker(false);
     }
+    void printColon(int xs, int ys) {//x start and y start - bottom left corner of letter
+      marker(false);
+      to(1 + xs, 1.5 + ys);
+      marker(true);
+      delay(100);
+      marker(false);
+      toLine(1 + xs, 0.5 + ys);
+      marker(true);
+      delay(100);
+      marker(false);
+    }
     void printString(String inString, int start = 0) {
       char stringArray[inString.length() + 1];
       inString.toCharArray(stringArray, inString.length() + 1); //put string in array of chars we can use
@@ -941,14 +954,21 @@ void setup() {
 }
 
 void loop() {
-  if (checkAlarm() == true) {
-    board.printString("ALARM", 2);
-    board.printString("TEMP", 10);
-    board.printString("TODAY", 18);
-    board.printString(String(getWeather()) + "C", 26);
-    board.to(8, 8);
-    delay(10000);
-  }
+  //  if (checkAlarm() == true) {
+  //    board.printString("ALARM", 2);
+  //    board.printString("TEMP", 10);
+  //    board.printString("TODAY", 18);
+  //    board.printString(String(getWeather()) + "C", 26);
+  //    board.to(8, 8);
+  //    delay(10000);
+  //  }
+
+  updateTime();
+  board.printString(String(nowHour) + ":" + String(nowMinute), 2);
+  board.printString("TEMP", 10);
+  board.printString(String(getWeather()) + "C", 26);
+  board.to(8, 8);
+  delay(5000);
 
   /*
     //MIT
